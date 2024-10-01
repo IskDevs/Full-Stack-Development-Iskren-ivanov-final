@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Catalog</title>
+    <!-- Include Vue.js CDN -->
+    <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+    <style>
+        /* Basic styles for the course catalog */
+        .course-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .course-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .course-card h2 {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+
+        .course-card p {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+
+        .course-card .price {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div class="course-card" v-for="course in courses" :key="course.id">
+            <img :src="course.image" :alt="course.title">
+            <h2>{{ course.title }}</h2>
+            <p class="price">£{{ course.price }}</p>
+            <p>{{ course.description }}</p>
+            <button @click="addToCart(course)">Add to Cart</button>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                courses: [
+                    {
+                        id: 1,
+                        title: "Mathematics for Kids",
+                        price: 49.99,
+                        image: "IMG/1.png",
+                        description: "An engaging course designed to help kids master mathematics with fun and interactive lessons."
+                    },
+                    {
+                        id: 2,
+                        title: "Science Adventures",
+                        price: 59.99,
+                        image: "https://via.placeholder.com/300",
+                        description: "Explore the wonders of science with hands-on experiments and interactive lessons."
+                    },
+                    {
+                        id: 3,
+                        title: "Art and Creativity",
+                        price: 39.99,
+                        image: "https://via.placeholder.com/300",
+                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture."
+                    }
+                ],
+                cart: []
+            },
+            methods: {
+                addToCart(course) {
+                    this.cart.push(course);
+                    alert(course.title + ' has been added to your cart!');
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
