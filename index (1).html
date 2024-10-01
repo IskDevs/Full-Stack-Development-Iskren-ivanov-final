@@ -9,12 +9,12 @@
     <style>
         /* Basic styles for the course catalog */
         .course-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border: 5px solid #ddd;
+            border-radius: 1px;
             padding: 20px;
             margin: 20px;
             max-width: 300px;
-            text-align: center;
+            text-align: center;e4riugy
         }
 
         .course-card img {
@@ -48,12 +48,13 @@
             <h2>{{ course.title }}</h2>
             <p class="price">£{{ course.price }}</p>
             <p>{{ course.description }}</p>
+            <p>{{ course.inventory }}</p>
             <button @click="addToCart(course)">Add to Cart</button>
         </div>
     </div>
 
     <script>
-        new Vue({
+       let webstore= new Vue({
             el: '#app',
             data: {
                 courses: [
@@ -62,20 +63,21 @@
                         title: "Mathematics for Kids",
                         price: 49.99,
                         image: "IMG/1.png",
-                        description: "An engaging course designed to help kids master mathematics with fun and interactive lessons."
+                        description: "An engaging course designed to help kids master mathematics with fun and interactive lessons.",
+                        inventory:10
                     },
                     {
                         id: 2,
                         title: "Science Adventures",
                         price: 59.99,
-                        image: "https://via.placeholder.com/300",
+                        image: "IMG/1.png",
                         description: "Explore the wonders of science with hands-on experiments and interactive lessons."
                     },
                     {
                         id: 3,
                         title: "Art and Creativity",
                         price: 39.99,
-                        image: "https://via.placeholder.com/300",
+                        image: "IMG/1.png",
                         description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture."
                     }
                 ],
