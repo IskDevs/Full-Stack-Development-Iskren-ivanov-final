@@ -41,10 +41,18 @@
         }
 
         .cart-item {
-            border-bottom: 1px solid #ddd;
-            padding: 10px;
+            border: 5px solid #ddd;
+            border-radius: 1px;
+            padding: 20px;
+            margin: 20px;
+            max-width: 300px;
+            text-align: center;
         }
-
+        .cart-item img{
+        max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
         .cart-item:last-child {
             border-bottom: none;
         }
@@ -73,6 +81,7 @@
                 <p>£{{ item.price }}</p>
                 <img :src="item.image" :alt="item.title">
                 <p>Quantity: {{ item.quantity }}</p>
+                <p>Total:£{{item.price * item.quantity}}</p>
                 <button @click="removeOneFromCart(item)"><i class="fa fa-times" style="font-size:15px;"></i></button>
                 <button @click="removeAllFromCart(item)">Remove All</button>
             </div>
