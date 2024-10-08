@@ -59,7 +59,8 @@
                 <p class="price">£{{ course.price }}</p>
                 <p>{{ course.description }}</p>
                 <p>Inventory: {{ course.inventory }}</p>
-                <button @click="addToCart(course)">Add to Cart</button>
+                <button v-if="course.inventory > 0" @click="addToCart(course)">Add to Cart</button>
+                <button v-else disabled>Out of Stock</button>
             </div>
             <button @click="showCart">View Cart</button>
         </div>
@@ -69,7 +70,10 @@
             <div class="cart-item" v-for="item in cart" :key="item.id">
                 <h3>{{ item.title }}</h3>
                 <p>£{{ item.price }}</p>
+                <img :src="item.image" :alt="item.title">
                 <p>Quantity: {{ item.quantity }}</p>
+                <button @click="removeOneFromCart(item)">[X]</button>
+                <button @click="removeAllFromCart(item)">Remove All</button>
             </div>
             <button @click="showCatalog = true">Back to Catalog</button>
         </div>
@@ -119,8 +123,21 @@
                         course.inventory--;
                     }
                 },
+                removeOneFromCart(item) {
+                    let course = this.courses.find(c => c.id === item.id);
+                    course.inventory++;
+                    item.quantity--;
+                    if (item.quantity === 0) {
+                        this.cart = this.cart.filter(i => i.id !== item.id);
+                    }
+                },
+                removeAllFromCart(item) {
+                    let course = this.courses.find(c => c.id === item.id);
+                    course.inventory += item.quantity;
+                    this.cart = this.cart.filter(i => i.id !== item.id);
+                },
                 showCart() {
-                    this.showCatalog = false;
+                    this.showCatalog = false ;
                 }
             }
         });
