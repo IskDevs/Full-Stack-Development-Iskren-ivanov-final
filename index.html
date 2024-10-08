@@ -6,6 +6,7 @@
     <title>Course Catalog</title>
     <!-- Include Vue.js CDN -->
     <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         /* Basic styles for the course catalog */
         .course-card {
@@ -59,10 +60,10 @@
                 <p class="price">£{{ course.price }}</p>
                 <p>{{ course.description }}</p>
                 <p>Inventory: {{ course.inventory }}</p>
-                <button v-if="course.inventory > 0" @click="addToCart(course)">Add to Cart</button>
+                <button v-if="course.inventory > 0" @click="addToCart(course)"><i class="fa fa-cart-plus" style="font-size:20px;"></i> Add to Cart</button>
                 <button v-else disabled>Out of Stock</button>
             </div>
-            <button @click="showCart">View Cart</button>
+            <button @click="showCart"><i class="fa fa-shopping-basket" style="font-size:20px;"></i> View Cart</button>
         </div>
 
         <div v-else>
@@ -72,7 +73,7 @@
                 <p>£{{ item.price }}</p>
                 <img :src="item.image" :alt="item.title">
                 <p>Quantity: {{ item.quantity }}</p>
-                <button @click="removeOneFromCart(item)">[X]</button>
+                <button @click="removeOneFromCart(item)"><i class="fa fa-times" style="font-size:15px;"></i></button>
                 <button @click="removeAllFromCart(item)">Remove All</button>
             </div>
             <button @click="showCatalog = true">Back to Catalog</button>
@@ -108,6 +109,7 @@
                         description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
                         inventory: 13
                     }
+                    
                 ],
                 cart: [],
                 showCatalog: true
