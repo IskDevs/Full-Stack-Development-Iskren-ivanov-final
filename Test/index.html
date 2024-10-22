@@ -62,6 +62,8 @@
 
     <div id="app">
         <div v-if="showCatalog">
+            <button @click="sortCoursesByTitle">Sort by Title</button>
+            <button @click="sortCoursesByPrice">Sort by Price</button>
             <div class="course-card" v-for="course in courses" :key="course.id">
                 <img :src="course.image" :alt="course.title">
                 <h2>{{ course.title }}</h2>
@@ -82,9 +84,11 @@
                 <img :src="item.image" :alt="item.title">
                 <p>Quantity: {{ item.quantity }}</p>
                 <p>Total:£{{item.price * item.quantity}}</p>
+                
                 <button @click="removeOneFromCart(item)"><i class="fa fa-times" style="font-size:15px;"></i></button>
                 <button @click="removeAllFromCart(item)">Remove All</button>
             </div>
+            <p>Total: £{{ totalCartPrice }}</p>
             <button @click="showCatalog = true">Back to Catalog</button>
         </div>
     </div>
@@ -96,83 +100,83 @@
                 courses: [
                     {
                         id: 1,
-                        title: "Mathematics for Kids",
+                        title: "Mathematics",
                         price: 49.99,
-                        image: "../IMG/1.png",
+                        image: "../IMG/Maths.png",
                         description: "An engaging course designed to help kids master mathematics with fun and interactive lessons.",
                         inventory: 10
                     },
                     {
                         id: 2,
-                        title: "Science Adventures",
+                        title: "Tripple Science",
                         price: 59.99,
-                        image: "../IMG/1.png",
+                        image: "../IMG/Tripple_Science.png",
                         description: "Explore the wonders of science with hands-on experiments and interactive lessons.",
                         inventory: 23
                     },
                     {
                         id: 3,
-                        title: "Art and Creativity",
+                        title: "Art and Design",
                         price: 39.99,
-                        image: "../IMG/1.png",
+                        image: "../IMG/Art.png",
                         description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
                         inventory: 13
                     },
                     {
                         id: 4,
-                        title: "Art and Creativity",
-                        price: 39.99,
-                        image: "../IMG/1.png",
+                        title: "Media Studies",
+                        price: 10.50,
+                        image: "../IMG/Media_Studies.png",
                         description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 13
+                        inventory: 11
                     },
                     {
                         id: 5,
-                        title: "Art and Creativity",
-                        price: 39.99,
-                        image: "../IMG/1.png",
+                        title: "English Learning",
+                        price: 25.99,
+                        image: "../IMG/English.png",
                         description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 13
+                        inventory: 9
                     },
                     {
                         id: 6,
-                        title: "Art and Creativity",
-                        price: 39.99,
-                        image: "../IMG/1.png",
+                        title: "Business Studies",
+                        price: 35.30,
+                        image: "../IMG/Business.png",
                         description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 13
+                        inventory: 5
                     },
                     {
                         id: 7,
-                        title: "Art and Creativity",
-                        price: 39.99,
-                        image: "../IMG/1.png",
+                        title: "Economics",
+                        price: 20.40,
+                        image: "../IMG/Economics.png",
                         description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 13
+                        inventory: 2
                     },
                     {
                         id: 8,
-                        title: "Art and Creativity",
-                        price: 39.99,
-                        image: "../IMG/1.png",
+                        title: "Computer Science",
+                        price: 52.50,
+                        image: "../IMG/Computer_Science.png",
                         description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 13
+                        inventory: 11
                     },
                     {
                         id: 9,
-                        title: "Art and Creativity",
-                        price: 39.99,
-                        image: "../IMG/1.png",
+                        title: "Information Technology",
+                        price: 41.99,
+                        image: "../IMG/IT.png",
                         description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 13
+                        inventory: 19
                     },
                     {
                         id: 10,
-                        title: "Art and Creativity",
-                        price: 39.99,
-                        image: "../IMG/1.png",
+                        title: "History",
+                        price: 21.99,
+                        image: "../IMG/History.png",
                         description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 13
+                        inventory: 14
                     },
                     
                 ],
@@ -205,8 +209,19 @@
                 },
                 showCart() {
                     this.showCatalog = false ;
+                },
+                sortCoursesByTitle() {
+                    this.courses.sort((CourseA, CourseB) => CourseA.title.localeCompare(CourseB.title));
+                },
+                sortCoursesByPrice() {
+                    this.courses.sort((CourseA, CourseB) => CourseB.price-CourseA.price);
                 }
+            },
+            computed: {
+            totalCartPrice() {
+                return this.cart.reduce((Accumilator, item) => Accumilator + item.price * item.quantity, 0);
             }
+        }
         });
     </script>
 
