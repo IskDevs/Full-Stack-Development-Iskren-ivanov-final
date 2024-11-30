@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Catalog</title>
-    <!-- Include Vue.js CDN -->
     <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -17,29 +16,24 @@
             max-width: 300px;
             text-align: center;
         }
-
         .course-card img {
             max-width: 100%;
             height: auto;
             border-radius: 8px;
         }
-
         .course-card h2 {
             font-size: 1.5em;
             margin: 10px 0;
         }
-
         .course-card p {
             font-size: 1.1em;
             margin: 10px 0;
         }
-
         .course-card .price {
             font-weight: bold;
             font-size: 1.2em;
             color: #28a745;
         }
-
         .cart-item {
             border: 5px solid #ddd;
             border-radius: 1px;
@@ -48,15 +42,14 @@
             max-width: 300px;
             text-align: center;
         }
-        .cart-item img{
-        max-width: 100%;
+        .cart-item img {
+            max-width: 100%;
             height: auto;
             border-radius: 8px;
         }
         .cart-item:last-child {
             border-bottom: none;
         }
-
         .stars {
             color: gold;
         }
@@ -88,7 +81,7 @@
                 <p>£{{ item.price }}</p>
                 <img :src="item.image" :alt="item.title">
                 <p>Quantity: {{ item.quantity }}</p>
-                <p>Total:£{{item.price * item.quantity}}</p>
+                <p>Total: £{{ item.price * item.quantity }}</p>
                 
                 <button @click="removeOneFromCart(item)"><i class="fa fa-times" style="font-size:15px;"></i></button>
                 <button @click="removeAllFromCart(item)">Remove All</button>
@@ -102,143 +95,72 @@
         let webstore = new Vue({
             el: '#app',
             data: {
-                courses: [
-                    {
-                        id: 1,
-                        title: "Mathematics",
-                        price: 49.99,
-                        image: "IMG/Maths.png",
-                        description: "An engaging course designed to help kids master mathematics with fun and interactive lessons.",
-                        inventory: 10,
-                        rating: 4
-                    },
-                    {
-                        id: 2,
-                        title: "Tripple Science",
-                        price: 59.99,
-                        image: "IMG/Tripple_Science.png",
-                        description: "Explore the wonders of science with hands-on experiments and interactive lessons.",
-                        inventory: 23,
-                        rating: 5
-                    },
-                    {
-                        id: 3,
-                        title: "Art and Design",
-                        price: 39.99,
-                        image: "IMG/Art.png",
-                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 13,
-                        rating: 3
-                    },
-                    {
-                        id: 4,
-                        title: "Media Studies",
-                        price: 10.50,
-                        image: "IMG/Media_Studies.png",
-                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 11,
-                        rating: 4
-                    },
-                    {
-                        id: 5,
-                        title: "English Learning",
-                        price: 25.99,
-                        image: "IMG/English.png",
-                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 9,
-                        rating: 2
-                    },
-                    {
-                        id: 6,
-                        title: "Business Studies",
-                        price: 35.30,
-                        image: "IMG/Business.png",
-                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 5,
-                        rating: 3
-                    },
-                    {
-                        id: 7,
-                        title: "Economics",
-                        price: 20.40,
-                        image: "IMG/Economics.png",
-                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 2,
-                        rating: 4
-                    },
-                    {
-                        id: 8,
-                        title: "Computer Science",
-                        price: 52.50,
-                        image: "IMG/Computer_Science.png",
-                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 11,
-                        rating: 5
-                    },
-                    {
-                        id: 9,
-                        title: "Information Technology",
-                        price: 41.99,
-                        image: "IMG/IT.png",
-                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 19,
-                        rating: 3
-                    },
-                    {
-                        id: 10,
-                        title: "History",
-                        price: 21.99,
-                        image: "IMG/History.png",
-                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
-                        inventory: 14,
-                        rating: 4
-                    },
-                    
-                ],
+                courses: [], // Local copy of courses
                 cart: [],
                 showCatalog: true
             },
+            created() {
+                this.fetchCourses(); // Fetch courses when the component is created
+            },
             methods: {
+                async fetchCourses() {
+                    try {
+                        const response = await fetch('http://localhost:4000/api/subjects'); // Replace with your MongoDB API endpoint
+                        const data = await response.json();
+                        this.courses = JSON.parse(JSON.stringify(data)); // Store a local copy of the fetched data
+                    } catch (error) {
+                        console.error("Error fetching courses:", error);
+                    }
+                },
                 addToCart(course) {
-                    let existingItem = this.cart.find(item => item.id === course.id);
+                    const existingItem = this.cart.find(item => item.id === course.id);
+                    const courseIndex = this.courses.findIndex(c => c.id === course.id);
+                    
                     if (existingItem) {
-                        existingItem.quantity++;
-                        course.inventory--;
+                        if (existingItem.quantity < this.courses[courseIndex].inventory) {
+                            existingItem.quantity++;
+                        } else {
+                            alert("Not enough inventory!");
+                        }
                     } else {
-                        this.cart.push({ ...course, quantity: 1 });
-                        course.inventory--;
+                        if (this.courses[courseIndex].inventory > 0) {
+                            this.cart.push({ ...course, quantity: 1 });
+                            this.courses[courseIndex].inventory--; // Decrement inventory in local copy
+                        } else {
+                            alert("Out of stock!");
+                        }
                     }
                 },
                 removeOneFromCart(item) {
-                    let course = this.courses.find(c => c.id === item.id);
-                    course.inventory++;
+                    const courseIndex = this.courses.findIndex(c => c.id === item.id);
+                    this.courses[courseIndex].inventory++; // Increment inventory in local copy
                     item.quantity--;
                     if (item.quantity === 0) {
                         this.cart = this.cart.filter(i => i.id !== item.id);
                     }
                 },
                 removeAllFromCart(item) {
-                    let course = this.courses.find(c => c.id === item.id);
-                    course.inventory += item.quantity;
+                    const courseIndex = this.courses.findIndex(c => c.id === item.id);
+                    this.courses[courseIndex].inventory += item.quantity; // Increment inventory in local copy
                     this.cart = this.cart.filter(i => i.id !== item.id);
                 },
                 showCart() {
-                    this.showCatalog = false ;
+                    this.showCatalog = false;
+                },
+                displayStars(rating) {
+                    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
                 },
                 sortCoursesByTitle() {
                     this.courses.sort((CourseA, CourseB) => CourseA.title.localeCompare(CourseB.title));
                 },
                 sortCoursesByPrice() {
-                    this.courses.sort((CourseA, CourseB) => CourseB.price-CourseA.price);
-                },
-                displayStars(rating) {
-                    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                    this.courses.sort((CourseA, CourseB) => CourseB.price - CourseA.price);
                 }
             },
             computed: {
                 totalCartPrice() {
-                    return this.cart.reduce((Accumilator, item) => Accumilator + item.price * item.quantity, 0);
- }
+                    return this.cart.reduce((accum, item) => accum + item.price * item.quantity, 0);
+                }
             }
         });
     </script>

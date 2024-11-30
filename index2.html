@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Catalog</title>
+    <!-- Include Vue.js CDN -->
+    <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        /* Basic styles for the course catalog */
+        .course-card {
+            border: 5px solid #ddd;
+            border-radius: 1px;
+            padding: 20px;
+            margin: 20px;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .course-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .course-card h2 {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+
+        .course-card p {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+
+        .course-card .price {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #28a745;
+        }
+
+        .cart-item {
+            border: 5px solid #ddd;
+            border-radius: 1px;
+            padding: 20px;
+            margin: 20px;
+            max-width: 300px;
+            text-align: center;
+        }
+        .cart-item img{
+        max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .stars {
+            color: gold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div v-if="showCatalog">
+            <button @click="sortCoursesByTitle">Sort by Title</button>
+            <button @click="sortCoursesByPrice">Sort by Price</button>
+            <div class="course-card" v-for="course in courses" :key="course.id">
+                <img :src="course.image" :alt="course.title">
+                <h2>{{ course.title }}</h2>
+                <p class="price">£{{ course.price }}</p>
+                <p>{{ course.description }}</p>
+                <p>Inventory: {{ course.inventory }}</p>
+                <p class="stars">{{ displayStars(course.rating) }}</p>
+                <button v-if="course.inventory > 0" @click="addToCart(course)"><i class="fa fa-cart-plus" style="font-size:20px;"></i> Add to Cart</button>
+                <button v-else disabled>Out of Stock</button>
+            </div>
+            <button @click="showCart"><i class="fa fa-shopping-basket" style="font-size:20px;"></i> View Cart</button>
+        </div>
+
+        <div v-else>
+            <h2>Cart</h2>
+            <div class="cart-item" v-for="item in cart" :key="item.id">
+                <h3>{{ item.title }}</h3>
+                <p>£{{ item.price }}</p>
+                <img :src="item.image" :alt="item.title">
+                <p>Quantity: {{ item.quantity }}</p>
+                <p>Total:£{{item.price * item.quantity}}</p>
+                
+                <button @click="removeOneFromCart(item)"><i class="fa fa-times" style="font-size:15px;"></i></button>
+                <button @click="removeAllFromCart(item)">Remove All</button>
+            </div>
+            <p>Total: £{{ totalCartPrice }}</p>
+            <button @click="showCatalog = true">Back to Catalog</button>
+        </div>
+    </div>
+
+    <script>
+        let webstore = new Vue({
+            el: '#app',
+            data: {
+                courses: [
+                    {
+                        id: 1,
+                        title: "Mathematics",
+                        price: 49.99,
+                        image: "IMG/Maths.png",
+                        description: "An engaging course designed to help kids master mathematics with fun and interactive lessons.",
+                        inventory: 10,
+                        rating: 4
+                    },
+                    {
+                        id: 2,
+                        title: "Tripple Science",
+                        price: 59.99,
+                        image: "IMG/Tripple_Science.png",
+                        description: "Explore the wonders of science with hands-on experiments and interactive lessons.",
+                        inventory: 23,
+                        rating: 5
+                    },
+                    {
+                        id: 3,
+                        title: "Art and Design",
+                        price: 39.99,
+                        image: "IMG/Art.png",
+                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
+                        inventory: 13,
+                        rating: 3
+                    },
+                    {
+                        id: 4,
+                        title: "Media Studies",
+                        price: 10.50,
+                        image: "IMG/Media_Studies.png",
+                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
+                        inventory: 11,
+                        rating: 4
+                    },
+                    {
+                        id: 5,
+                        title: "English Learning",
+                        price: 25.99,
+                        image: "IMG/English.png",
+                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
+                        inventory: 9,
+                        rating: 2
+                    },
+                    {
+                        id: 6,
+                        title: "Business Studies",
+                        price: 35.30,
+                        image: "IMG/Business.png",
+                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
+                        inventory: 5,
+                        rating: 3
+                    },
+                    {
+                        id: 7,
+                        title: "Economics",
+                        price: 20.40,
+                        image: "IMG/Economics.png",
+                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
+                        inventory: 2,
+                        rating: 4
+                    },
+                    {
+                        id: 8,
+                        title: "Computer Science",
+                        price: 52.50,
+                        image: "IMG/Computer_Science.png",
+                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
+                        inventory: 11,
+                        rating: 5
+                    },
+                    {
+                        id: 9,
+                        title: "Information Technology",
+                        price: 41.99,
+                        image: "IMG/IT.png",
+                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
+                        inventory: 19,
+                        rating: 3
+                    },
+                    {
+                        id: 10,
+                        title: "History",
+                        price: 21.99,
+                        image: "IMG/History.png",
+                        description: "Unleash your child's creativity through our art lessons that focus on painting, drawing, and sculpture.",
+                        inventory: 14,
+                        rating: 4
+                    },
+                    
+                ],
+                cart: [],
+                showCatalog: true
+            },
+            methods: {
+                addToCart(course) {
+                    let existingItem = this.cart.find(item => item.id === course.id);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                        course.inventory--;
+                    } else {
+                        this.cart.push({ ...course, quantity: 1 });
+                        course.inventory--;
+                    }
+                },
+                removeOneFromCart(item) {
+                    let course = this.courses.find(c => c.id === item.id);
+                    course.inventory++;
+                    item.quantity--;
+                    if (item.quantity === 0) {
+                        this.cart = this.cart.filter(i => i.id !== item.id);
+                    }
+                },
+                removeAllFromCart(item) {
+                    let course = this.courses.find(c => c.id === item.id);
+                    course.inventory += item.quantity;
+                    this.cart = this.cart.filter(i => i.id !== item.id);
+                },
+                showCart() {
+                    this.showCatalog = false ;
+                },
+                sortCoursesByTitle() {
+                    this.courses.sort((CourseA, CourseB) => CourseA.title.localeCompare(CourseB.title));
+                },
+                sortCoursesByPrice() {
+                    this.courses.sort((CourseA, CourseB) => CourseB.price-CourseA.price);
+                },
+                displayStars(rating) {
+                    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                }
+            },
+            computed: {
+                totalCartPrice() {
+                    return this.cart.reduce((Accumilator, item) => Accumilator + item.price * item.quantity, 0);
+ }
+            }
+        });
+    </script>
+
+</body>
+</html>
