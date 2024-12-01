@@ -53,6 +53,47 @@
         .stars {
             color: gold;
         }
+        div {
+        max-width: 400px; /* Set a maximum width for the form */
+        margin: 20px auto; /* Center the form horizontally */
+        padding: 20px; /* Add padding inside the form */
+        border: 1px solid #ccc; /* Add a light border */
+        border-radius: 8px; /* Round the corners */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+        background-color: #f9f9f9; /* Light background color */
+    }
+
+    label {
+        display: block; /* Make labels block elements */
+        margin-bottom: 5px; /* Space between label and input */
+        font-weight: bold; /* Bold text for labels */
+    }
+
+    input[type="text"] {
+        width: 100%; /* Full width for inputs */
+        padding: 10px; /* Padding inside the input */
+        margin-bottom: 15px; /* Space between inputs */
+        border: 1px solid #ccc; /* Light border for inputs */
+        border-radius: 4px; /* Round the corners of inputs */
+        font-size: 16px; /* Increase font size */
+    }
+
+    button {
+        width: 100%; /* Full width for button */
+        padding: 10px; /* Padding inside the button */
+        background-color: #28a745; /* Green background color */
+        color: white; /* White text color */
+        border: none; /* Remove border */
+        border-radius: 4px; /* Round the corners */
+        font-size: 16px; /* Increase font size */
+        cursor: pointer; /* Pointer cursor on hover */
+        transition: background-color 0.3s; /* Smooth transition for hover effect */
+        margin-top: 10px
+    }
+
+    button:hover {
+        background-color: #218838; /* Darker green on hover */
+    }
     </style>
 </head>
 <body>
@@ -70,11 +111,16 @@
                 <h2>{{ course.title }}</h2>
                 <p class="price">£{{ course.price }}</p>
                 <p>{{ course.description }}</p>
-                <p>Inventory: {{ localInventory[course.id] }}</p>
+                <p>Inventory: {{ remainingInventory.find(item => item.id === course.id).remaining }}</p> <!-- Updated line -->
                 <p>Location: {{ course.location }}</p>
                 <p class="stars">{{ displayStars(course.rating) }}</p>
-                <button v-if="course.inventory > 0" @click="addToCart(course)"><i class="fa fa-cart-plus" style="font-size:20px;"></i> Add to Cart</button>
-                <button v-else disabled>Out of Stock</button>
+                <button 
+                :disabled="localInventory[course.id] === 0" 
+                @click="addToCart(course)">
+                <i class="fa fa-cart-plus" style="font-size:20px;"></i> 
+                <span v-if="localInventory[course.id] > 0">Add to Cart</span>
+                <span v-else>Out of Stock</span>
+            </button>
             </div>
             <button @click="showCart"><i class="fa fa-shopping-basket" style="font-size:20px;"></i> View Cart</button>
         </div>
@@ -92,10 +138,29 @@
                 <button @click="removeOneFromCart(item)"><i class="fa fa-times" style="font-size:15px;"></i></button>
                 <button @click="removeAllFromCart(item)">Remove All</button>
             </div>
+        
             <p>Total: £{{ totalCartPrice }}</p>
-            <button @click="showCatalog = true">Back to Catalog</button>
+        
+            <!-- New input fields for user details -->
+            <div>
+                <template v-if="showUser Details">
+                    <label for="name">Name:</label>
+                    <input type="text" v-model="userName" placeholder="Enter your name">
+                    
+                    <label for="phone">Phone Number:</label>
+                    <input type="text" v-model="userPhone" placeholder="Enter your phone number">
+                    
+                    <label for="address">Address:</label>
+                    <input type="text" v-model="userAddress" placeholder="Enter your address">
+                    
+                    <button @click="checkout">Checkout</button>
+                </template>
+            
+                <div v-if="receiptSubmitted">
+                    <p>Receipt Submitted</p>
+                </div>
+            </div>
         </div>
-    </div>
 
     <script>
         let webstore = new Vue({
@@ -111,6 +176,63 @@
                 this.fetchCourses(); // Fetch courses when the component is created
             },
             methods: {
+                async checkout() {
+        const cartData = {
+            userName: this.userName,
+            userPhone: this.userPhone,
+            userAddress: this.userAddress,
+            items: this.cart
+        };
+
+        try {
+            // First, save the cart data
+            const response = await fetch('http://localhost:4000/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(cartData)
+            });
+
+            if (response.ok) {
+                // Update inventory for each item in the cart
+                for (const item of cartData.items) {
+                    await this.updateInventory(item.id, item.quantity);
+                }
+
+                this.receiptSubmitted = true; // Show receipt message
+                // Reset the cart and user details
+                this.cart = [];
+                this.userName = '';
+                this.userPhone = '';
+                this.userAddress = '';
+            } else {
+                console.error('Error saving cart:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error during checkout:', error);
+        }
+    },
+    
+    async updateInventory(itemId, quantity) {
+        try {
+            const response = await fetch(`http://localhost:4000/api/subjects/inventory/${itemId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ quantity }) // Send the quantity to subtract
+            });
+
+            if (!response.ok) {
+                console.error('Error updating inventory:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error during inventory update:', error);
+        }
+    },
+    
+
                 async fetchCourses() {
                     try {
                         const response = await fetch('http://localhost:4000/api/subjects'); // Your MongoDB API endpoint
@@ -127,42 +249,55 @@
                     }
                 },
                 addToCart(course) {
-                    const existingItem = this.cart.find(item => item.id === course.id);
-                    const courseIndex = this.courses.findIndex(c => c.id === course.id);
+    const existingItem = this.cart.find(item => item.id === course.id);
+    const courseIndex = this.courses.findIndex(c => c.id === course.id);
 
-                    // Ensure inventory is a number
-                    const inventory = Number(this.courses[courseIndex].inventory);
+    // Ensure inventory is a number
+    const inventory = Number(this.courses[courseIndex].inventory);
 
-                    // Check if the course exists in the cart
-                    if (existingItem) {
-                        // Check if we can increase the quantity
-                        if (existingItem.quantity < inventory) {
-                            existingItem.quantity++;
-                        } else {
-                            alert("Not enough inventory!");
-                        }
-                    } else {
-                        // Add the course to the cart if it doesn't exist already
-                        if (inventory > 0) {
-                            this.cart.push({ ...course, quantity: 1 });
-                        } else {
-                            alert("Out of stock!");
-                        }
-                    }
-                },
-                removeOneFromCart(item) {
-                    const courseIndex = this.originalCourses.findIndex(c => c.id === item.id);
-                    this.originalCourses[courseIndex].inventory++; // Increment inventory in original data
-                    item.quantity--;
-                    if (item.quantity === 0) {
-                        this.cart = this.cart.filter(i => i.id !== item.id);
-                    }
-                },
-                removeAllFromCart(item) {
-                    const courseIndex = this.originalCourses.findIndex(c => c.id === item.id);
-                    this.originalCourses[courseIndex].inventory += item.quantity; // Increment inventory by the total quantity in the cart
-                    this.cart = this.cart.filter(i => i.id !== item.id);
-                },
+    // Check if the course exists in the cart
+    if (existingItem) {
+        // Check if we can increase the quantity
+        if (existingItem.quantity < inventory) {
+            existingItem.quantity++;
+            this.localInventory[course.id]--; // Decrease inventory in localInventory
+            console.log(`Inventory left for ${course.title}: ${inventory - existingItem.quantity}`); // Log inventory left
+        } else {
+            alert("Not enough inventory!");
+        }
+    } else {
+        // Add the course to the cart if it doesn't exist already
+        if (inventory > 0) {
+            this.cart.push({ ...course, quantity: 1 });
+            this.localInventory[course.id]--; // Decrease inventory in localInventory
+            console.log(`Inventory left for ${course.title}: ${inventory - 1}`); // Log inventory left
+        } else {
+            alert("Out of stock!");
+        }
+    }
+},
+removeOneFromCart(item) {
+    const courseIndex = this.originalCourses.findIndex(c => c.id === item.id);
+    this.originalCourses[courseIndex].inventory++; // Increment inventory in original data
+    item.quantity--;
+    this.localInventory[item.id]++; // Increment local inventory as well
+
+    if (item.quantity === 0) {
+        this.cart = this.cart.filter(i => i.id !== item.id);
+    }
+},
+removeAllFromCart(item) {
+    const courseIndex = this.originalCourses.findIndex(c => c.id === item.id);
+    
+    // Increment inventory in original data
+    this.originalCourses[courseIndex].inventory += item.quantity; // Increment inventory by the total quantity in the cart
+    
+    // Update local inventory
+    this.localInventory[item.id] += item.quantity; // Increment local inventory by the total quantity
+    
+    // Remove the item from the cart
+    this.cart = this.cart.filter(i => i.id !== item.id);
+},
                 showCart() {
                     this.showCatalog = false;
                 },
@@ -195,7 +330,18 @@
             computed: {
                 totalCartPrice() {
                     return this.cart.reduce((accum, item) => accum + item.price * item.quantity, 0);
-                }
+                },
+                remainingInventory() {
+        return this.courses.map(course => {
+            const existingItem = this.cart.find(item => item.id === course.id);
+            const quantityInCart = existingItem ? existingItem.quantity : 0;
+            return {
+                id: course.id,
+                title: course.title,
+                remaining: course.inventory - quantityInCart // Calculate remaining inventory
+            };
+        });
+    }
             }
         });
     </script>
