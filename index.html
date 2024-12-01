@@ -59,14 +59,19 @@
 
     <div id="app">
         <div v-if="showCatalog">
-            <button @click="sortCoursesByTitle">Sort by Title</button>
-            <button @click="sortCoursesByPrice">Sort by Price</button>
+            <button @click="sortCoursesByTitleAsc">Title Ascending</button>
+            <button @click="sortCoursesByTitleDesc">Title Descending</button>
+            <button @click="sortCoursesByPriceAsc">Price Ascending</button>
+            <button @click="sortCoursesByPriceDesc">Price Descending</button>
+            <button @click="sortCoursesByLocationAsc">Location Ascending</button>
+            <button @click="sortCoursesByLocationDesc">Location Descending</button>
             <div class="course-card" v-for="course in courses" :key="course.id">
                 <img :src="course.image" :alt="course.title">
                 <h2>{{ course.title }}</h2>
                 <p class="price">£{{ course.price }}</p>
                 <p>{{ course.description }}</p>
-                <p>Inventory: {{ course.inventory }}</p>
+                <p>Inventory: {{ localInventory[course.id] }}</p>
+                <p>Location: {{ course.location }}</p>
                 <p class="stars">{{ displayStars(course.rating) }}</p>
                 <button v-if="course.inventory > 0" @click="addToCart(course)"><i class="fa fa-cart-plus" style="font-size:20px;"></i> Add to Cart</button>
                 <button v-else disabled>Out of Stock</button>
@@ -79,6 +84,7 @@
             <div class="cart-item" v-for="item in cart" :key="item.id">
                 <h3>{{ item.title }}</h3>
                 <p>£{{ item.price }}</p>
+                <p>Location: {{ item.location }}</p>
                 <img :src="item.image" :alt="item.title">
                 <p>Quantity: {{ item.quantity }}</p>
                 <p>Total: £{{ item.price * item.quantity }}</p>
@@ -96,8 +102,10 @@
             el: '#app',
             data: {
                 courses: [], // Local copy of courses
+                originalCourses: [], // New property to hold the original courses data
                 cart: [],
-                showCatalog: true
+                showCatalog: true,
+                localInventory: {} // New property to hold static inventory values
             },
             created() {
                 this.fetchCourses(); // Fetch courses when the component is created
@@ -105,9 +113,15 @@
             methods: {
                 async fetchCourses() {
                     try {
-                        const response = await fetch('http://localhost:4000/api/subjects'); // Replace with your MongoDB API endpoint
+                        const response = await fetch('http://localhost:4000/api/subjects'); // Your MongoDB API endpoint
                         const data = await response.json();
                         this.courses = JSON.parse(JSON.stringify(data)); // Store a local copy of the fetched data
+                        this.originalCourses = JSON.parse(JSON.stringify(data)); // Store the original data for reference
+                        
+                        // Initialize localInventory with the fetched inventory
+                        this.courses.forEach(course => {
+                            this.localInventory[course.id] = course.inventory; // Store static inventory
+                        });
                     } catch (error) {
                         console.error("Error fetching courses:", error);
                     }
@@ -115,33 +129,38 @@
                 addToCart(course) {
                     const existingItem = this.cart.find(item => item.id === course.id);
                     const courseIndex = this.courses.findIndex(c => c.id === course.id);
-                    
+
+                    // Ensure inventory is a number
+                    const inventory = Number(this.courses[courseIndex].inventory);
+
+                    // Check if the course exists in the cart
                     if (existingItem) {
-                        if (existingItem.quantity < this.courses[courseIndex].inventory) {
+                        // Check if we can increase the quantity
+                        if (existingItem.quantity < inventory) {
                             existingItem.quantity++;
                         } else {
                             alert("Not enough inventory!");
                         }
                     } else {
-                        if (this.courses[courseIndex].inventory > 0) {
+                        // Add the course to the cart if it doesn't exist already
+                        if (inventory > 0) {
                             this.cart.push({ ...course, quantity: 1 });
-                            this.courses[courseIndex].inventory--; // Decrement inventory in local copy
                         } else {
                             alert("Out of stock!");
                         }
                     }
                 },
                 removeOneFromCart(item) {
-                    const courseIndex = this.courses.findIndex(c => c.id === item.id);
-                    this.courses[courseIndex].inventory++; // Increment inventory in local copy
+                    const courseIndex = this.originalCourses.findIndex(c => c.id === item.id);
+                    this.originalCourses[courseIndex].inventory++; // Increment inventory in original data
                     item.quantity--;
                     if (item.quantity === 0) {
                         this.cart = this.cart.filter(i => i.id !== item.id);
                     }
                 },
                 removeAllFromCart(item) {
-                    const courseIndex = this.courses.findIndex(c => c.id === item.id);
-                    this.courses[courseIndex].inventory += item.quantity; // Increment inventory in local copy
+                    const courseIndex = this.originalCourses.findIndex(c => c.id === item.id);
+                    this.originalCourses[courseIndex].inventory += item.quantity; // Increment inventory by the total quantity in the cart
                     this.cart = this.cart.filter(i => i.id !== item.id);
                 },
                 showCart() {
@@ -150,11 +169,27 @@
                 displayStars(rating) {
                     return '★'.repeat(rating) + '☆'.repeat(5 - rating);
                 },
-                sortCoursesByTitle() {
+                showCatalog() {
+                    this.showCatalog = true;
+                    this.courses = JSON.parse(JSON.stringify(this.originalCourses)); // Reset courses to original data
+                },
+                sortCoursesByTitleAsc() {
                     this.courses.sort((CourseA, CourseB) => CourseA.title.localeCompare(CourseB.title));
                 },
-                sortCoursesByPrice() {
+                sortCoursesByTitleDesc() {
+                    this.courses.sort((CourseA, CourseB) => CourseB.title.localeCompare(CourseA.title));
+                },
+                sortCoursesByPriceAsc() {
+                    this.courses.sort((CourseA, CourseB) => CourseA.price - CourseB.price);
+                },
+                sortCoursesByPriceDesc() {
                     this.courses.sort((CourseA, CourseB) => CourseB.price - CourseA.price);
+                },
+                sortCoursesByLocationAsc() {
+                    this.courses.sort((CourseA, CourseB) => CourseA.location.localeCompare(CourseB.location));
+                },
+                sortCoursesByLocationDesc() {
+                    this.courses.sort((CourseA, CourseB) => CourseB.location.localeCompare(CourseA.location));
                 }
             },
             computed: {
