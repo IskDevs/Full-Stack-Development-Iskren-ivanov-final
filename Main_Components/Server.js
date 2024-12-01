@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 
-app.use(express.static(path.join(__dirname, '..', '..', 'Full Stack Development'))); // Navigate to the parent directory
+const fullStackDevelopmentPath = 'C:\\Users\\iskre\\OneDrive\\Desktop\\Full Stack Development';
 // MongoDB connection string
 
 // Logger middleware
