@@ -100,13 +100,14 @@
 
     <div id="app">
         <div v-if="showCatalog">
+            <input type="text" v-model="searchTerm" placeholder="Search for lessons..." />
             <button @click="sortCoursesByTitleAsc">Title Ascending</button>
             <button @click="sortCoursesByTitleDesc">Title Descending</button>
             <button @click="sortCoursesByPriceAsc">Price Ascending</button>
             <button @click="sortCoursesByPriceDesc">Price Descending</button>
             <button @click="sortCoursesByLocationAsc">Location Ascending</button>
             <button @click="sortCoursesByLocationDesc">Location Descending</button>
-            <div class="course-card" v-for="course in courses" :key="course.id">
+            <div class="course-card" v-for="course in filteredCourses" :key="course.id">
                 <img :src="course.image" :alt="course.title">
                 <h2>{{ course.title }}</h2>
                 <p class="price">£{{ course.price }}</p>
@@ -171,6 +172,7 @@
                 originalCourses: [], // New property to hold the original courses data
                 cart: [],
                 showCatalog: true,
+                searchTerm: '', // New property for search term
                 localInventory: {} // New property to hold static inventory values
             },
             created() {
@@ -178,6 +180,10 @@
             },
             methods: {
                 async checkout() {
+                    if (this.cart.length === 0) {
+        alert("Your cart is empty. Please add items to the cart before checking out.");
+        return;
+    }
                                 // Validation
             if (!this.userName || !/^[a-zA-Z\s]+$/.test(this.userName)) {
                 alert("Please enter a valid name (letters only).");
@@ -351,21 +357,35 @@ removeAllFromCart(item) {
                 }
             },
             computed: {
-                totalCartPrice() {
-                    return this.cart.reduce((accum, item) => accum + item.price * item.quantity, 0);
-                },
-                remainingInventory() {
+    totalCartPrice() {
+        return this.cart.reduce((accum, item) => accum + item.price * item.quantity, 0);
+    },
+    remainingInventory() {
         return this.courses.map(course => {
             const existingItem = this.cart.find(item => item.id === course.id);
             const quantityInCart = existingItem ? existingItem.quantity : 0;
             return {
                 id: course.id,
                 title: course.title,
-                remaining: course.inventory - quantityInCart // Calculate remaining inventory
+                remaining: course.inventory - quantityInCart
             };
         });
+    },
+    filteredCourses() {
+        if (!this.searchTerm) {
+            return this.courses; // Return all courses if no search term
+        }
+        const term = this.searchTerm.toLowerCase(); // Convert search term to lower case
+        return this.courses.filter(course => {
+            return (
+                course.title.toLowerCase().includes(term) ||
+                course.location.toLowerCase().includes(term) ||
+                course.price.toString().includes(term) || // Convert price to string for comparison
+                course.inventory.toString().includes(term) // Convert inventory to string for comparison
+            );
+        });
     }
-            }
+}
         });
     </script>
 
