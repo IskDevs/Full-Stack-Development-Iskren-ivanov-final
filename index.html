@@ -111,7 +111,7 @@
                 <h2>{{ course.title }}</h2>
                 <p class="price">£{{ course.price }}</p>
                 <p>{{ course.description }}</p>
-                <p>Inventory: {{ remainingInventory.find(item => item.id === course.id).remaining }}</p> <!-- Updated line -->
+                <p>Inventory: {{ remainingInventory.find(item => item.id === course.id).remaining }}</p>
                 <p>Location: {{ course.location }}</p>
                 <p class="stars">{{ displayStars(course.rating) }}</p>
                 <button 
@@ -143,22 +143,23 @@
         
             <!-- New input fields for user details -->
             <div>
-                <template v-if="showUser Details">
-                    <label for="name">Name:</label>
-                    <input type="text" v-model="userName" placeholder="Enter your name">
-                    
-                    <label for="phone">Phone Number:</label>
-                    <input type="text" v-model="userPhone" placeholder="Enter your phone number">
-                    
-                    <label for="address">Address:</label>
-                    <input type="text" v-model="userAddress" placeholder="Enter your address">
-                    
-                    <button @click="checkout">Checkout</button>
-                </template>
-            
-                <div v-if="receiptSubmitted">
-                    <p>Receipt Submitted</p>
-                </div>
+                <label for="name">Name:</label>
+                <input type="text" v-model="userName" placeholder="Enter your name">
+                
+                <label for="phone">Phone Number:</label>
+                <input type="text" v-model="userPhone" placeholder="Enter your phone number">
+                
+                <label for="address">Address:</label>
+                <input type="text" v-model="userAddress" placeholder="Enter your address">
+                
+                <button @click="checkout">Checkout</button>
+            </div>
+        
+            <button @click="showCatalog = true">Back to Catalog</button>
+        
+            <!-- Receipt message -->
+            <div v-if="receiptSubmitted">
+                <p>Receipt Submitted</p>
             </div>
         </div>
 
@@ -177,60 +178,82 @@
             },
             methods: {
                 async checkout() {
-        const cartData = {
-            userName: this.userName,
-            userPhone: this.userPhone,
-            userAddress: this.userAddress,
-            items: this.cart
-        };
-
-        try {
-            // First, save the cart data
-            const response = await fetch('http://localhost:4000/api/cart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(cartData)
-            });
-
-            if (response.ok) {
-                // Update inventory for each item in the cart
-                for (const item of cartData.items) {
-                    await this.updateInventory(item.id, item.quantity);
-                }
-
-                this.receiptSubmitted = true; // Show receipt message
-                // Reset the cart and user details
-                this.cart = [];
-                this.userName = '';
-                this.userPhone = '';
-                this.userAddress = '';
-            } else {
-                console.error('Error saving cart:', response.statusText);
+                                // Validation
+            if (!this.userName || !/^[a-zA-Z\s]+$/.test(this.userName)) {
+                alert("Please enter a valid name (letters only).");
+                return;
             }
-        } catch (error) {
-            console.error('Error during checkout:', error);
+            if (!this.userPhone || !/^\+?\d{10,15}$/.test(this.userPhone)) {
+                alert("Please enter a valid phone number (10-15 digits, optional country code).");
+                return;
+            }
+            if (!this.userAddress) {
+                alert("Please enter your address.");
+                return;
+            }
+            const cartData = {
+        userName: this.userName,
+        userPhone: this.userPhone,
+        userAddress: this.userAddress,
+        items: this.cart
+    };
+
+    try {
+        // First, save the cart data
+        const response = await fetch('http://localhost:4000/api/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(cartData)
+        });
+
+        if (response.ok) {
+            // Update inventory for each item in the cart
+            for (const item of cartData.items) {
+                await this.updateInventory(item.id); // Call to update inventory
+            }
+
+            // Fetch updated courses after checkout
+            await this.fetchCourses(); // Fetch the latest courses
+
+            this.receiptSubmitted = true; // Show receipt message
+            // Reset the cart and user details
+            this.cart = [];
+            this.userName = '';
+            this.userPhone = '';
+            this.userAddress = '';
+        } else {
+            console.error('Error saving cart:', response.statusText);
         }
-    },
+    } catch (error) {
+        console.error('Error during checkout:', error);
+    }
+},
     
-    async updateInventory(itemId, quantity) {
-        try {
-            const response = await fetch(`http://localhost:4000/api/subjects/inventory/${itemId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ quantity }) // Send the quantity to subtract
-            });
+async updateInventory(itemId) {
+    try {
+        // Find the remaining inventory for the specific item
+        const remaining = this.remainingInventory.find(item => item.id === itemId).remaining;
 
-            if (!response.ok) {
-                console.error('Error updating inventory:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error during inventory update:', error);
+        const response = await fetch(`http://localhost:4000/api/subjects/inventory/${itemId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ inventory: remaining }) // Send the remaining inventory as the body
+        });
+
+        if (!response.ok) {
+            console.error('Error updating inventory:', response.statusText);
+        } else {
+            const data = await response.json();
+            console.log(data.message); // Log success message
         }
-    },
+    } catch (error) {
+        console.error('Error during inventory update:', error);
+    }
+},
     
 
                 async fetchCourses() {
