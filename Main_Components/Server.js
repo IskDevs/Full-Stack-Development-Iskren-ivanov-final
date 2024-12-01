@@ -12,11 +12,7 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-<<<<<<< HEAD
 
-=======
-// directory can differ depending on where exoress.js is 
->>>>>>> parent of 5dcca9b (REMOVING backend and making different repo)
 app.use(express.static(path.join(__dirname, '..', '..', 'Full Stack Development'))); // Navigate to the parent directory
 // MongoDB connection string
 
@@ -66,31 +62,20 @@ app.post('/api/cart', async (req, res) => {
 app.get('/api/subjects', async (req, res) => {
     try {
         const subjects = await client.collection('Subjects').find().toArray();
-<<<<<<< HEAD
         console.log('Fetched subjects:', subjects); // Log the fetched subjects
-=======
->>>>>>> parent of 5dcca9b (REMOVING backend and making different repo)
         res.json(subjects);
     } catch (error) {
         console.error('Error fetching subjects:', error);
         res.status(500).send('Error fetching subjects');
     }
 });
-<<<<<<< HEAD
-=======
-
->>>>>>> parent of 5dcca9b (REMOVING backend and making different repo)
 // Get all user info
 app.get('/api/userinfo', async (req, res) => {
     try {
         const users = await client.collection('UserInfo').find().toArray();
         res.json(users);
     } catch (error) {
-<<<<<<< HEAD
         console.error('Error fetching user info:', error);
-=======
-        console.error('Error fetching user information:', error);
->>>>>>> parent of 5dcca9b (REMOVING backend and making different repo)
         res.status(500).send('Error fetching user info');
     }
 });
@@ -101,13 +86,8 @@ app.get('/api/cart', async (req, res) => {
         const carts = await client.collection('Cart').find().toArray();
         res.json(carts);
     } catch (error) {
-<<<<<<< HEAD
         console.error('Error fetching cart items:', error);
         res.status(500).send('Error fetching cart items');
-=======
-        console.error('Error fetching cart items(cart api):', error);
-        res.status(500).send('Error fetching cart items (cart api)');
->>>>>>> parent of 5dcca9b (REMOVING backend and making different repo)
     }
 });
 
