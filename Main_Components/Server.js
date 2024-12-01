@@ -62,13 +62,13 @@ app.post('/api/cart', async (req, res) => {
 app.get('/api/subjects', async (req, res) => {
     try {
         const subjects = await client.collection('Subjects').find().toArray();
+        console.log('Fetched subjects:', subjects); // Log the fetched subjects
         res.json(subjects);
     } catch (error) {
         console.error('Error fetching subjects:', error);
         res.status(500).send('Error fetching subjects');
     }
 });
-
 // Get all user info
 app.get('/api/userinfo', async (req, res) => {
     try {
