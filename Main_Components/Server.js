@@ -12,8 +12,16 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+
 app.use(express.static(path.join(__dirname, '..', '..', 'Full Stack Development'))); // Navigate to the parent directory
 // MongoDB connection string
+
+// Logger middleware
+app.use((req, res, next) => {
+    const currentTime = new Date().toISOString();
+    console.log(`[${currentTime}] ${req.method} request to ${req.url}`);
+    next(); // Call the next middleware in the stack
+});
 const mongoURI = 'mongodb+srv://ii209:ii209@fullstackiskrenivanov.v1vgx.mongodb.net/?retryWrites=true&w=majority';
 
 // Create a MongoDB client
