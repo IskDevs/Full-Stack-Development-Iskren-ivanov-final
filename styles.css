@@ -1,43 +1,87 @@
- /* Basic styles for the course catalog */
- body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #f4f4f4;
-}
-.course-card {
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 10px 0;
-    display: inline-block;
-    width: calc(25% - 20px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-.course-card img {
-    max-width: 100%;
-    height: auto;
-}
-.price {
-    font-weight: bold;
-    color: green;
-}
-.cart-item {
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 10px 0;
-}
-/* Styles for the simple list */
-.course-list {
-    margin-top: 20px;
-}
-.course-list-item {
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    margin: 5px 0;
-}
+        /* Basic styles for the course catalog */
+        .course-card {
+            border: 5px solid #ddd;
+            border-radius: 1px;
+            padding: 20px;
+            margin: 20px;
+            max-width: 300px;
+            text-align: center;
+        }
+        .course-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .course-card h2 {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+        .course-card p {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        .course-card .price {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #28a745;
+        }
+        .cart-item {
+            border: 5px solid #ddd;
+            border-radius: 1px;
+            padding: 20px;
+            margin: 20px;
+            max-width: 300px;
+            text-align: center;
+        }
+        .cart-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .stars {
+            color: gold;
+        }
+        div {
+        max-width: 400px; /* Set a maximum width for the form */
+        margin: 20px auto; /* Center the form horizontally */
+        padding: 20px; /* Add padding inside the form */
+        border: 1px solid #ccc; /* Add a light border */
+        border-radius: 8px; /* Round the corners */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+        background-color: #f9f9f9; /* Light background color */
+    }
+
+    label {
+        display: block; /* Make labels block elements */
+        margin-bottom: 5px; /* Space between label and input */
+        font-weight: bold; /* Bold text for labels */
+    }
+
+    input[type="text"] {
+        width: 100%; /* Full width for inputs */
+        padding: 10px; /* Padding inside the input */
+        margin-bottom: 15px; /* Space between inputs */
+        border: 1px solid #ccc; /* Light border for inputs */
+        border-radius: 4px; /* Round the corners of inputs */
+        font-size: 16px; /* Increase font size */
+    }
+
+    button {
+        width: 100%; /* Full width for button */
+        padding: 10px; /* Padding inside the button */
+        background-color: #28a745; /* Green background color */
+        color: white; /* White text color */
+        border: none; /* Remove border */
+        border-radius: 4px; /* Round the corners */
+        font-size: 16px; /* Increase font size */
+        cursor: pointer; /* Pointer cursor on hover */
+        transition: background-color 0.3s; /* Smooth transition for hover effect */
+        margin-top: 10px
+    }
+
+    button:hover {
+        background-color: #218838; /* Darker green on hover */
+    }
